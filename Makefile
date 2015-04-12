@@ -47,7 +47,8 @@ ifeq ($(OS),Linux)
 CC?=gcc -ansi
 endif
 
-CFLAGS=-g -DRELEASE=\"$(RELEASE)\" $(OS_DEFINES)
+CC=gcc
+CFLAGS=-g -DRELEASE=\"$(RELEASE)\" $(OS_DEFINES) -ansi
 
 
 addpath:	addpath.o

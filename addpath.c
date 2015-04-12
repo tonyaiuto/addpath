@@ -4,12 +4,13 @@
  * Description: tool to add elements to PATH style variables
  *
  * Author: Tony Aiuto
- * Source: http://tony.aiu.to/sa
+ * Source: http://tony.aiu.to/sa https://github.com/tonyaiuto/addpath
  *
- * Copyright Tony Aiuto (c) 1990-2006
+ * Copyright Tony Aiuto (c) 1990-2015
  */
 
 
+#include <getopt.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,27 +20,19 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-extern int	optind;
-extern char	*optarg;
-
-typedef enum {	SH, CSH, CMD } ShellType;
+typedef enum { SH, CSH, CMD } ShellType;
 
 #if defined(_WIN32)
-static	char	delimiter = ';';		/* input path separator */
-static	char	pathSep = ';';			/* output path separator */
-static	int	slashToBackSlash = 1;		/* emit / as \, for windoze */
-static	ShellType	shellType = CMD;
+static	const char	delimiter = ';';		// input path separator
+static	char		pathSep = ';';			// output path separator
+static	int		slash_to_backslash = 1;		// emit / as \, for windows
+static	ShellType	shell_type = CMD;
 #else
-static	char	delimiter = ':';		/* input path sep */
-static	char	pathSep = ':';			/* output path sep */
-static	int	slashToBackSlash = 0;		/* emit / as \, for windoze */
-static	ShellType	shellType = SH;
+static	const char	delimiter = ':';		/* input path sep */
+static	char		pathSep = ':';			/* output path sep */
+static	int		slash_to_backslash = 0;		/* emit / as \, for windows */
+static	ShellType	shell_type = SH;
 #endif
-
-static	int	allowDuplicates = 0;		/* allow duplicates */
-static	int	sourceform = 0;			/* print a source-able output */
-static	int	checkDir = 0;			/* check for presence of path elem */
-static	const char	*pathName = NULL;	/* path name we are checking */
 
 
 static void pversion()
@@ -67,12 +60,12 @@ static void usage()
 }
 
 
-/* Check if a path contains a particular element
- * return 0 for no, non-zero for yes
+/*
+ * Check if a path contains a particular element
+ * Returns: 0 for no, non-zero for yes
  * note: uses global delimiter settings to split path
  */
-
-static int path_contains(const char *path, const char *elem)
+static int PathContains(const char* path, const char* elem)
 {
 	const char	*estart, *eend;
 	int	elen = strlen(elem);
@@ -93,16 +86,14 @@ static int path_contains(const char *path, const char *elem)
 	return 0;
 }
 
-static void printPath(FILE *out, const char *path)
+static void PrintPath(FILE* out, const char* path)
 {
-	const char	*p;
-
 	if(path == NULL) return;
-
+	const char* p;
 	for(p = path; *p; p++) {
 		if(*p == delimiter) {
 			fputc(pathSep, out);
-		} else if(slashToBackSlash && *p == '/') {
+		} else if(slash_to_backslash && *p == '/') {
 			fputc('\\', out);
 		} else {
 			fputc(*p, out);
@@ -119,7 +110,7 @@ static void printPath(FILE *out, const char *path)
  *	1	successful variable substitution
  *	-1	failed substitution
  */
-char *replaceEnv(const char *s, int *status)
+char *ReplaceEnv(const char *s, int *status)
 {
 	int	olen = strlen(s) + 1;
 	char	*out = (char *) malloc(olen);
@@ -184,15 +175,15 @@ static int dirExists(const char *path)
 static setDefaultsForCSH()
 {
 	pathSep = ' ';
-	slashToBackSlash = 0;
-	shellType = CSH;
+	slash_to_backslash = 0;
+	shell_type = CSH;
 }
 
 static setDefaultsForSH()
 {
 	pathSep = ':';
-	slashToBackSlash = 0;
-	shellType = SH;
+	slash_to_backslash = 0;
+	shell_type = SH;
 }
 
 int main(int argc, char *argv[])
@@ -200,11 +191,14 @@ int main(int argc, char *argv[])
 	char	*path;
 	int	c;
 
-	int	front = 0;
-	int	quickExit = 0;
-	int	anything = 0;
-	const char	*shell;
-
+	int allow_duplicates = 0;
+	int source_form = 0;  /* print a source-able output */
+	int check_dir = 0;  /* check for existance of path element before adding. */
+	char* path_name = NULL;	/* path name we are checking */
+	int front = 0;
+	int quick_exit = 0;
+	int anything = 0;
+	const char* shell;
 
 	/* set up defaults based on the SHELL */
 	shell = getenv("SHELL");
@@ -214,7 +208,6 @@ int main(int argc, char *argv[])
 			setDefaultsForCSH();
 		}
 	}
-
 
 	while((c = getopt(argc, argv, "bcdfe:hp:swVx")) != EOF) {
 		switch(c) {
@@ -226,11 +219,11 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'd':
-			allowDuplicates = 1;
+			allow_duplicates = 1;
 			break;
 
 		case 'e':
-			if(getenv(optarg) == NULL) quickExit = 1;
+			if(getenv(optarg) == NULL) quick_exit = 1;
 			break;
 
 		case 'f':
@@ -242,11 +235,11 @@ int main(int argc, char *argv[])
 			return 1;
 
 		case 'p':
-			pathName = strdup(optarg);
+			path_name = strdup(optarg);
 			break;
 
 		case 's':
-			sourceform = 1;
+			source_form = 1;
 			break;
 
 		case 'V':
@@ -255,11 +248,11 @@ int main(int argc, char *argv[])
 
 		case 'w':
 			pathSep = ';';
-			slashToBackSlash = 1;
+			slash_to_backslash = 1;
 			break;
 
 		case 'x':
-			checkDir = 1;
+			check_dir = 1;
 			break;
 
 		default:
@@ -269,49 +262,47 @@ int main(int argc, char *argv[])
 
 	/* Now get the path variable */
 
-	if(pathName == NULL) {
-		pathName = "PATH";
+	if(path_name == NULL) {
+		path_name = "PATH";
 	}
-	path = getenv(pathName);
+	path = getenv(path_name);
 	if(path == NULL) path = "";
 
-	/* printf("%s = '%s'\n", pathName, path); */
-
-	if(quickExit) {
-		printPath(stdout, path);
+	if(quick_exit) {
+		PrintPath(stdout, path);
 		printf("\n");
 		return 0;
 	}
 
-	if(sourceform) {
-		if(shellType == CSH) {
+	if(source_form) {
+		if(shell_type == CSH) {
 			fprintf(stdout, "set path = ( ");
-		} else if(shellType == SH) {
-			fprintf(stdout, "%s=", pathName);
+		} else if(shell_type == SH) {
+			fprintf(stdout, "%s=", path_name);
 		}
 
 	}
 
 	if(front == 0) {
-		printPath(stdout, path);
+		PrintPath(stdout, path);
 		if(path != NULL && *path != '\0') anything = 1;
 	}
 	for(; optind < argc; optind++) {
 		char *newelem = argv[optind];
 		int	status = 0;
-		newelem = replaceEnv(newelem, &status);
+		newelem = ReplaceEnv(newelem, &status);
 		if(status < 0) continue;
-		if(checkDir && !dirExists(newelem)) {
+		if(check_dir && !dirExists(newelem)) {
 			free(newelem);
 			continue;
 		}
-		if(allowDuplicates || !path_contains(path, newelem)) {
+		if(allow_duplicates || !PathContains(path, newelem)) {
 			if(front) {
 				if(anything > 0) fputc(pathSep, stdout);
-				printPath(stdout, newelem);
+				PrintPath(stdout, newelem);
 			} else {
 				if(anything > 0) fputc(pathSep, stdout);
-				printPath(stdout, newelem);
+				PrintPath(stdout, newelem);
 			}
 			anything += 1;
 		}
@@ -321,15 +312,13 @@ int main(int argc, char *argv[])
 		if(anything > 0 && path != NULL && *path != '\0') {
 			fputc(pathSep, stdout);
 		}
-		printPath(stdout, path);
+		PrintPath(stdout, path);
 	}
-	if(sourceform) {
-		if(shellType == CSH) {
+	if(source_form) {
+		if(shell_type == CSH) {
 			fprintf(stdout, " )");
 		}
 	}
 	printf("\n");
-
 	exit(0);
 }
-
