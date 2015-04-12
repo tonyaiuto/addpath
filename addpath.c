@@ -172,14 +172,14 @@ static int dirExists(const char *path)
 	return 0;
 }
 
-static setDefaultsForCSH()
+static void setDefaultsForCSH()
 {
 	pathSep = ' ';
 	slash_to_backslash = 0;
 	shell_type = CSH;
 }
 
-static setDefaultsForSH()
+static void setDefaultsForSH()
 {
 	pathSep = ':';
 	slash_to_backslash = 0;
