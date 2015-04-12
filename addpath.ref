@@ -28,26 +28,25 @@ multiple versions of various tools on several platforms, so that we
 want to constantly switch our paths.
 Thus, this need often arises:
 <PRE>
-	% echo $PATH
+	$ echo $PATH
 	/users/tony/bin:/usr/local/bin:/bin:/usr/bin:/opt/java/jdk200/bin
 
 		I want to try this with a different JDK
 
-	% setenv JDK_HOME /opt/java/jdk117
-	% csh
+	$ JDK_HOME=/opt/java/jdk117
+	$ bash
 		I want this to happen
-	% echo $PATH
-	/users/tony/bin:/usr/local/bin:/bin:/usr/bin:/opt/java/jdk116/bin
+	$ echo $PATH
+	/users/tony/bin:/usr/local/bin:/bin:/usr/bin:/opt/java/jdk117/bin
 </PRE>
 The practical solution is to do something like this:
 <PRE>
-	# .cshrc
+	# .bashrc
 
-	set path = ( $HOME/bin /usr/local/bin /bin /usr/bin )
-
-	if ( $?JDK_HOME ) then
-		set path = ( $path $JDK_HOME/bin )
-	endif
+	PATH=$HOME/bin:/usr/local/bin:/bin:/usr/bin
+	if [[ -n "$JDK_HOME" ]] ; then
+	    PATH=$PATH:$JDK_HOME/bin
+	fi
 </PRE>
 This works fine up to a point.   If you try, howerver, to add something
 to your path
@@ -56,21 +55,21 @@ want is to be able to set JDK_HOME in the environment and have your shell .rc fi
 add $JDK_HOME/bin to your path only if it needs it.
 With <I>addpath</I> we can do this
 <PRE>
-	# .cshrc
+	# .bashrc
 
 	# make sure that these are in the path, without
 	# disturbing other items
-	set path = `addpath -cf $HOME/bin /usr/local/bin /bin /usr/bin`
+	PATH=$(addpath -f $HOME/bin /usr/local/bin /bin /usr/bin)
 
 	# add the JDK toolkit to the front of the path if we have it
-	set path = `addpath -f -e JDK_HOME '$JDK_HOME/bin'`
+	PATH=$(addpath -f -e JDK_HOME '$JDK_HOME/bin')
 
 	# or use the shorthand.  This works because if JDK_HOME is not in
 	# the environment, addpath will skip the element which references it
-	set path = `addpath -f '$JDK_HOME/bin'`
+	PATH=$(addpath -f '$JDK_HOME/bin')
 
 	# or use the portable method that works for both Bourne and C shells
-	eval `addpath -sf '$JDK_HOME/bin'`
+	eval $(addpath -sf '$JDK_HOME/bin')
 </PRE>
 
 
