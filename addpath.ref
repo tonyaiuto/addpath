@@ -69,6 +69,8 @@ With <I>addpath</I> we can do this
 	PATH=$(addpath -f '$JDK_HOME/bin')
 
 	# or use the portable method that works for both Bourne and C shells
+	# (Note that $JDK_HOME must be in single quotes so the shell does not
+	# do the evaluation.)
 	eval $(addpath -sf '$JDK_HOME/bin')
 </PRE>
 
@@ -92,7 +94,7 @@ which are in the path already</DD>
 <DD>Use <I>var</I> rather than PATH.</DD>
 <DT>-s</DT>
 <DD>emit an output that you could "source" (or eval) back into your shell.
-Thuu <b>eval `addpath -s '$ANT_HOME/bin'`</b> should work in all shells</DD>
+Thus <b>eval $(addpath -s '$ANT_HOME/bin')</b> should work in all shells</DD>
 <DT>-x</DT>
 <DD>Check new path elements for existance (as directories) before adding.</DD>
 </DL>
