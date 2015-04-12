@@ -26,3 +26,7 @@
 *.exe
 *.out
 *.app
+
+# Generate man pages
+*.1
+*.html

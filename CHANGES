@@ -1,0 +1,10 @@
+
+2.1.0
+	add -s option to emit source
+	add -x option to check for directory
+	add auto-detect of shell type (Bourne or C)
+	correct bug where /foo/binx was detected as being in the path /foo/bin:/x/y
+
+2.0.1
+	fix bug when path contains "::"
+	add test cases

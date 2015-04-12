@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# html2troff - convert stylized html to troff format
+#
+# It does not get much hackier than this.
+
+DATE=`date +%d-%b%-%Y`
+
+sed \
+-e s#@PACKAGE@#$PACKAGE#g \
+-e '/<html>/d' \
+-e '/<head>/d' \
+-e 's#<title>\([^ ]*\).*</title>#.TH \1 1 "'$DATE'" "Release '$RELEASE'"#' \
+-e 's#<title>\(.*\)</title>#.TL \1#' \
+-e 's#<[Hh][12345]>\(.*\)</[Hh][12345]>#.SH \1#' \
+-e 's#<DL>#.TP 10#' \
+-e '/<DT>/i\
+.TP' \
+-e 's#<DT>\([^ ]*\)  *\(.*\)</DT>#.BI \1 \2#' \
+-e 's#<DT>\(.*\)</DT>#.B \1#' \
+-e 's#<PRE>#.nf#' \
+-e 's#</PRE>#.fi#' \
+-e 's#<P>#.P#' \
+-e 's#<P>#.P#' \
+-e 's#</P>#.br#' \
+-e 's#<I>\(.*\)</I>#\\fI\1\\fR#g' \
+-e 's#<B>\(.*\)</B>#\\fB\1\\fR#g' \
+-e 's#</BODY>#.br#' \
+-e 's#<[^>]*>##g' \
+-e '/^$/d'  $*
+
+exit 0
