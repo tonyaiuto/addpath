@@ -37,7 +37,7 @@ static	ShellType	shell_type = SH;
 
 static void pversion()
 {
-	printf("addpath %s, http://tony.aiu.to/sa/\n", RELEASE);
+	printf("addpath %s, https://github.com/tonyaiuto/addpath\n", RELEASE);
 }
 
 static void usage()
@@ -49,7 +49,7 @@ static void usage()
 	printf("\texamining $SHELL.\n");
 	printf("\t-b\temit Bourne style path.  e.g. 'a:b:c:...'\n");
 	printf("\t-c\temit Csh style path.  e.g. 'a b c ...'\n");
-	printf("\t-w\temit Windoze style path.  e.g. 'a;b;c;...'\n");
+	printf("\t-w\temit Windows style path.  e.g. 'a;b;c;...'\n");
 
 	printf("\t-d\tforce new elements in even if they are Duplicates\n");
 	printf("\t-e\tonly do it if environment variable env_var is defined.\n");
